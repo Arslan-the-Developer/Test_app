@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Cart{% endblock title %}
+{% load static %}
+{% block style %}
+
+.subtract_quantity{
+    font-weight:bold;
+    display:inline-block;
+    width:25px;
+    height:30px;
+    background-color:#fa7b20;
+    color:white;
+    border-top-left-radius:3px;
+    border-bottom-left-radius:3px;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+}
+
+.product_quan{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.prod_quan{
+    display:inline-block;
+    width:25px;
+    height:30px;
+    background-color:#ff6421;
+    color:white;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+}
+
+.add_quantity{
+    display:inline-block;
+    width:25px;
+    height:30px;
+    color:white;
+    background-color:#fa7b20;
+    border-top-right-radius:3px;
+    border-bottom-right-radius:3px;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+}
+
+.delete_prod{
+    display:inline-block;
+    padding:5px 6px;
+    color:white;
+    background-color:#e01300;
+    border-radius:3px;
+    text-align:center;
+    margin-left:10px;
+    border:none;
+}
+
+{% endblock style %}
+{% block body %}
+{% csrf_token %}
+
+<div class="container" style="padding:50px 0;">
+    <h2 class="section-title">Cart</h2>
+    {% if total_prods > 0 %}
+    <div style="display:flex; justify-content:space-between;">
+    <div class="cart_card_container" style="width:50%; display:flex; flex-direction:column; align-items:center; justify-content:space-between;">
+        {% for product in cart_products %}
+        <div class="cart_card">
+            <div class="row flex">
+                <div class="cart_img" style="width:25%; display:flex; align-items:center; justify-content:center;">
+                    <a href="{% url 'product_detail' product.product.pk %}"><img style="width:100%; object-fit:contain;" src="{{product.product.product_image.url}}" alt="....."></a>
+                </div>
+                <div class="cart_info" style="width:70%; display: flex; align-items: center; justify-content:space-between;">
+                    <a href="{% url 'product_detail' product.product.pk %}"><div class="product_info">
+                        <h4 style="font-weight:bold;">{{ product.product.product_name }}</h4>
+                        <h4 style="color:#ff6421;">Rs. {{ product.product.product_price }}</h4>
+                    </div>
+                    </a>
+                    <div class="product_quan" data-product-id="{{ product.product.id }}" data-product-price="{{ product.product.product_price }}">
+                        <span class="subtract_quantity"><i class="bi bi-dash"></i></span>
+                        <span class="prod_quan">{{product.product_quantity}}</span>
+                        <span class="add_quantity"><i class="bi bi-plus"></i></span>
+                        <form action="/cart" method="POST">
+                            {% csrf_token %}
+                            <input type="hidden" id="del_prod" name="del_prod" value="{{product.product.product_name}}">
+                            <button type='submit' class="delete_prod"><i class="bi bi-trash-fill"></i></button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br>
+        {% endfor %}
+    </div>
+    <div class="cart_total" style="width:40%; height:400px; background-color:#f7f7f7; position: relative; border:1px solid #ff6421;">
+        <h3 class="text-center mt-4" style="font-size:32px;">Total</h3>
+        <span style="content:''; display:block; width:100%; border:1px solid #ff6421;"></span>
+        <div class="all_info p-4">
+            <h4 id="total_items" style="font-weight:bold;">Total Items : {{total_prods}}</h4>
+            </h4>
+            <hr>
+            <h4>Total Price : <span id="total_price">{{total_price}}</span></h4>
+        </div>
+        <div class="checkout_div" style="position: absolute; bottom:6%; display:flex; align-items:center; justify-content:center; text-align:center; width:100%;">
+                <a href="/clear-cart"><button  type="submit" href="/checkout" style="border:none; padding:7px 13px; font-size:17px; background-color:#b50f00; color:white; border-radius:4px;">Clear Cart</button></a>
+            <a href="/checkout" style="border:none; padding:7px 13px; font-size:17px; background-color:#ff6421; color:white; margin-left:10px; border-radius:4px;">Checkout</a>
+        </div>
+    </div>
+</div>
+{% else %}
+<div style="display:flex; flex-direction:column; justify-content:center; align-items:center">
+<img src="{% static 'assets/empty_cart.svg' %}" class="img-fluid animated" alt="..." style="width:28%; object-fit:contain;">
+<h3 class="text-center mt-5">Your Cart is Currently Empty</h3>
+<a href="/products" style="border:none; padding:7px 13px; font-size:17px; background-color:#ff6421; color:white; margin-top:10px; border-radius:4px;">Shop Now</a>
+</div>
+{% endif %}
+</div>
+
+<script>
+    let subtract_buttons = document.querySelectorAll('.subtract_quantity');
+    let add_buttons = document.querySelectorAll('.add_quantity');
+
+    subtract_buttons.forEach(function(button) {
+        button.addEventListener('click', function() {
+            let prod_quan = this.nextElementSibling;
+            let old_quantity = parseInt(prod_quan.innerText);
+            let new_quantity = old_quantity - 1;
+            if (new_quantity < 1) {
+                new_quantity = 1;
+            }
+            if (isNaN(new_quantity)) {
+                console.error('New quantity is not a number:', new_quantity);
+                return;
+            }
+            prod_quan.innerText = new_quantity;
+            if (new_quantity != old_quantity) {
+                updateQuantityInDatabase(this.parentElement.dataset.productId, new_quantity, -1);
+            }
+        });
+    });
+
+    add_buttons.forEach(function(button) {
+        button.addEventListener('click', function() {
+            let prod_quan = this.previousElementSibling;
+            let old_quantity = parseInt(prod_quan.innerText);
+            let new_quantity = old_quantity + 1;
+            if (isNaN(new_quantity)) {
+                console.error('New quantity is not a number:', new_quantity);
+                return;
+            }
+            prod_quan.innerText = new_quantity;
+            if (new_quantity != old_quantity) {
+                updateQuantityInDatabase(this.parentElement.dataset.productId, new_quantity, 1);
+            }
+        });
+    });
+
+    function updateQuantityInDatabase(product_id, new_quantity, change_in_quantity) {
+        let xhr = new XMLHttpRequest();
+        xhr.open('POST', '/update_cart_quantity', true);
+        xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+        xhr.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
+        xhr.onload = function() {
+            if (this.status == 200) {
+                let response = JSON.parse(this.responseText);
+                if (response.success) {
+                    // Get the product price and convert it to a number
+                    let product_price = parseFloat(document.querySelector(`[data-product-id="${product_id}"]`).dataset.productPrice);
+                    if (isNaN(product_price)) {
+                        console.error('Product price is not a number:', product_price);
+                        return;
+                    }
+
+                    // Update the total number of items and convert it to a number
+                    let total_items_element = document.getElementById('total_items');
+                    let total_items = parseInt(total_items_element.innerText.split(":")[1].trim());
+                    if (isNaN(total_items)) {
+                        console.error('Total items is not a number:', total_items);
+                        return;
+                    }
+                    total_items_element.innerText = "Total Items : " + (total_items + change_in_quantity);
+
+                    // Update the total price and convert it to a number
+                    let total_price_element = document.getElementById('total_price');
+                    let total_price = parseFloat(total_price_element.innerText);
+                    if (isNaN(total_price)) {
+                        console.error('Total price is not a number:', total_price);
+                        return;
+                    }
+                    total_price_element.innerText = total_price + (change_in_quantity * product_price);
+                } else {
+                    alert('There was an error updating the quantity in the database.');
+                }
+            }
+        };
+        xhr.onerror = function() {
+            console.error('Network error');
+        };
+        xhr.send('product_id=' + product_id + '&quantity=' + new_quantity);
+    }
+</script>
+
+
+
+{% endblock body %}

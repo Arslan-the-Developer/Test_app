@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock title %}
+
+{% block body %}
+
+
+<section id="contact" class="contact section">
+
+  <div class="container" data-aos="fade-up" data-aos-delay="100" style="width:35%;">
+        
+      <div class="row" style='margin-top:25px'>
+
+        <div>
+            
+          <form action="/auth/login/" method="POST" class="php-email-form" data-aos="fade-up" data-aos-delay="200">{% csrf_token %}
+            <!-- Section Title -->
+            <div class="container section-title" style="margin-bottom:-50px;" data-aos="fade-up">
+              <div class="container section-title" style="margin-bottom:-50px;" data-aos="fade-up">
+                {% for message in messages %}
+        
+                  <div class="alert alert-{{message.tags}} alert-dismissable fade show" role="alert" style="border-radius:0px;">
+                    <strong>{{message}}</strong>
+                  </div>
+              
+                {% endfor %}
+                <h2>Login</h2>
+            </div><!-- End Section Title -->
+
+              <div class="col-md-12">
+                <label for="name" class="pb-2">Username</label>
+                <input type="text" class="form-control" name="name" id="name" required>
+              </div>
+
+              <div class="col-md-12">
+                <label for="pass1" class="pb-2">Password</label>
+                <input type="password" style="box-shadow: 0 0 1px 0px orange; border-radius:0px;" class="form-control" name="pass1" id="pass1" required>
+              </div>
+
+              <br>
+              
+              <div class="col-md-12 text-center">
+                <button type="submit" style="border-radius:0px;">Login</button>
+                <span style="display:flex; align-items:center; justify-content:center; margin-top:12px;">New User? <a href="/auth/signup/">SignUp</a></span>
+              </div>
+
+            </div>
+          </form>
+        </div><!-- End Contact Form -->
+
+      </div>
+
+    </div>
+
+  </section>
+
+<!-- /Contact Section -->
+
+
+{% endblock body %}

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Signup{% endblock title %}
+
+{% block body %}
+
+
+<section id="contact" class="contact section">
+
+  <div class="container" data-aos="fade-up" data-aos-delay="100" style="width:35%;">
+        
+      <div class="row" style='margin-top:-25px'>
+        
+        <div>
+            
+          <form action="/auth/signup/" method="POST" class="php-email-form" data-aos="fade-up" data-aos-delay="200">{% csrf_token %}
+            <!-- Section Title -->
+            <div class="container section-title" style="margin-bottom:-50px;" data-aos="fade-up">
+              {% for message in messages %}
+      
+                <div class="alert alert-{{message.tags}} alert-dismissable fade show" role="alert" style="border-radius:0px;">
+                  <strong>{{message}}</strong>
+                </div>
+            
+              {% endfor %}
+                <h2>Signup</h2>
+            </div><!-- End Section Title -->
+
+              <div class="col-md-12">
+                <label for="name" class="pb-2">Name</label>
+                <input type="text" name="name" id="name" class="form-control" required>
+              </div>
+
+              <div class="col-md-12">
+                <label for="email" class="pb-2">Email</label>
+                <input type="email" class="form-control" name="email" id="email" required>
+              </div>
+
+              <div class="col-md-12">
+                <label for="pass1" class="pb-2">Password</label>
+                <input type="password" style="box-shadow: 0 0 1px 0px orange; border-radius:0px;" class="form-control" name="pass1" id="pass1" required>
+              </div>
+
+              <div class="col-md-12">
+                <label for="pass2" class="pb-2">Confirm Password</label>
+                <input type="password" style="box-shadow: 0 0 1px 0px orange; border-radius:0px;" class="form-control" name="pass2" id="pass2" required>
+              </div>
+              <br>
+              
+              <div class="col-md-12 text-center">
+                <button type="submit" style="border-radius:0px;">SignUp</button>
+                <span style="display:flex; align-items:center; justify-content:center; margin-top:12px;">Already a User?<a href="/auth/login">Login</a></span>
+              </div>
+
+            </div>
+          </form>
+        </div><!-- End Contact Form -->
+
+      </div>
+
+    </div>
+
+  </section>
+
+<!-- /Contact Section -->
+
+
+{% endblock body %}
